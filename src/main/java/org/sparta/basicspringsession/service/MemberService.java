@@ -1,9 +1,7 @@
 package org.sparta.basicspringsession.service;
 
 import lombok.RequiredArgsConstructor;
-import org.sparta.basicspringsession.dto.MemberSaveRequestDto;
-import org.sparta.basicspringsession.dto.MemberSaveResponseDto;
-import org.sparta.basicspringsession.dto.MemberSimpleResponseDto;
+import org.sparta.basicspringsession.dto.*;
 import org.sparta.basicspringsession.entity.Member;
 import org.sparta.basicspringsession.repository.MemberRepository;
 import org.springframework.stereotype.Service;
@@ -27,13 +25,38 @@ public class MemberService {
     }
 
     public List<MemberSimpleResponseDto> getMembers() {
-        List<Member> members = memberRepository.findAll();
+        List<Member> memberList = memberRepository.findAll();
 
-        List<MemberSimpleResponseDto> memberSimpleResponseDtos = new ArrayList<>();
-        for (Member member : members) {
-            memberSimpleResponseDtos.add(new MemberSimpleResponseDto(member.getId(), member.getName()));
+        List<MemberSimpleResponseDto> dtoList = new ArrayList<>();
+        for (Member member : memberList) {
+//            memberSimpleResponseDtos.add(new MemberSimpleResponseDto(member.getName()));
+            MemberSimpleResponseDto dto = new MemberSimpleResponseDto(member.getName());
+            dtoList.add(dto);
         }
-        return memberSimpleResponseDtos;
+//        return memberSimpleResponseDtos;
+        return dtoList;
     }
+
+     public MemberDetailResponseDto getMember(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NullPointerException("멤버가 없습니다"));
+
+        return new MemberDetailResponseDto(member.getId(), member.getName());
+     }
+
+     @Transactional
+    public MemberUpdateResponseDto updateMember(Long memberId, MemberUpdateRequestDto requestDto) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NullPointerException("멤버가 없습니다."));
+
+        member.update(requestDto.getName());
+
+        return new MemberUpdateResponseDto(member.getId(), member.getName());
+     }
+
+     @Transactional
+    public void deleteMember(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new NullPointerException("멤버가 없습니다"));
+
+        memberRepository.delete(member);
+     }
 
 }
